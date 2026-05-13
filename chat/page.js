@@ -4,7 +4,10 @@ import { useState } from "react";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: "assistant", text: "Hi 👋 I’m CloseMind AI. How can I help you close more deals today?" }
+    {
+      role: "assistant",
+      text: "Hi 👋 I’m CloseMind AI. Tell me the objection you’re dealing with."
+    }
   ]);
 
   const [input, setInput] = useState("");
@@ -12,16 +15,14 @@ export default function ChatPage() {
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    const newMessages = [
-      ...messages,
-      { role: "user", text: input },
-      {
-        role: "assistant",
-        text: "Got it. I’m analyzing your objection and generating the best response..."
-      }
-    ];
+    const userMessage = { role: "user", text: input };
 
-    setMessages(newMessages);
+    const aiMessage = {
+      role: "assistant",
+      text: "I’m analyzing this objection... Here’s a strong response: Focus on value, ROI, and reduce risk for the buyer."
+    };
+
+    setMessages([...messages, userMessage, aiMessage]);
     setInput("");
   };
 
@@ -33,8 +34,8 @@ export default function ChatPage() {
         CloseMind AI Chat
       </div>
 
-      {/* CHAT AREA */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      {/* CHAT MESSAGES */}
+      <div className="flex-1 p-6 space-y-4 overflow-y-auto">
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -54,7 +55,7 @@ export default function ChatPage() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your objection..."
+          placeholder="Type an objection..."
           className="flex-1 p-3 rounded-lg bg-zinc-900 border border-zinc-700"
         />
 
@@ -69,3 +70,4 @@ export default function ChatPage() {
     </main>
   );
 }
+
