@@ -5,6 +5,7 @@ import { useState } from "react";
 export default function Home() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const analyzeObjection = () => {
     const text = input.toLowerCase();
@@ -296,6 +297,16 @@ Gather emotional context before attempting to persuade.
     }
   };
 
+  const copyResult = async () => {
+    await navigator.clipboard.writeText(result);
+
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
   return (
     <div
       style={{
@@ -371,9 +382,32 @@ Gather emotional context before attempting to persuade.
               border: "1px solid #1F2937"
             }}
           >
-            <h2 style={{ color: "#A78BFA" }}>
-              AI Analysis
-            </h2>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
+              <h2 style={{ color: "#A78BFA" }}>
+                AI Analysis
+              </h2>
+
+              <button
+                onClick={copyResult}
+                style={{
+                  background: "#6D5EF6",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 14px",
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+              >
+                {copied ? "Copied!" : "Copy Response"}
+              </button>
+            </div>
 
             <div
               style={{
