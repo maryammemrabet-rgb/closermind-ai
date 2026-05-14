@@ -332,12 +332,49 @@ Closing Direction: ${result.closingDirection}
 
             <div
               style={{
-                marginTop: "8px",
-                fontSize: "24px",
-                fontWeight: "bold"
+                marginTop: "12px"
               }}
             >
-              {result.intentScore}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "8px"
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "bold"
+                  }}
+                >
+                  {result.intentScore}
+                </span>
+
+                <span style={{ color: "#9CA3AF" }}>
+                  Buying Intent
+                </span>
+              </div>
+
+              <div
+                style={{
+                  width: "100%",
+                  height: "10px",
+                  background: "#1F2937",
+                  borderRadius: "999px",
+                  overflow: "hidden"
+                }}
+              >
+                <div
+                  style={{
+                    width: result.intentScore,
+                    height: "100%",
+                    background: "#6D5EF6",
+                    borderRadius: "999px",
+                    transition: "all 0.5s ease"
+                  }}
+                />
+              </div>
             </div>
           </div>
 
