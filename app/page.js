@@ -537,5 +537,3 @@ Closing Direction: ${result.closingDirection}
     </div>
   );
 }
-}
-       
