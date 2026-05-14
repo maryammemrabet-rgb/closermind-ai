@@ -358,18 +358,37 @@ Gather emotional context before attempting to persuade.
         <div
           style={{
             marginTop: "35px",
-            background: "#111827",
-            padding: "30px",
-            borderRadius: "20px",
-            whiteSpace: "pre-wrap",
-            border: "1px solid #1F2937",
-            lineHeight: "1.7"
+            display: "flex",
+            flexDirection: "column",
+            gap: "20px"
           }}
         >
-          {result}
+          <div
+            style={{
+              background: "#111827",
+              padding: "24px",
+              borderRadius: "18px",
+              border: "1px solid #1F2937"
+            }}
+          >
+            <h2 style={{ color: "#A78BFA" }}>
+              AI Analysis
+            </h2>
+
+            <div
+              style={{
+                whiteSpace: "pre-wrap",
+                lineHeight: "1.8",
+                color: "#E5E7EB",
+                marginTop: "15px"
+              }}
+            >
+              {result}
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 }
- 
+       
