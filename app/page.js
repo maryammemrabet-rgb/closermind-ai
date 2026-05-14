@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [input, setInput] = useState("");
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
 
   const analyzeObjection = () => {
@@ -17,64 +17,38 @@ export default function Home() {
       text.includes("too much") ||
       text.includes("price")
     ) {
-      setResult(`
-Objection Type: Budget Resistance
-
-Emotional State:
-Interested but financially cautious
-
-Intent Score:
-78/100
-
-Hidden Meaning:
-The prospect likely sees value, but emotionally associates the investment with risk.
-This objection is rarely about pure affordability — it is usually about certainty and perceived ROI.
-
-Recommended Strategy:
-Increase certainty and reframe the investment around outcomes.
-
-Best Response:
-I completely understand — and honestly, most people who ended up getting the strongest results initially felt the exact same way.
-
-Usually when someone says it's expensive, it’s not necessarily that they can’t do it — it’s that they want to feel fully confident the investment will truly pay off.
-
-Out of curiosity, what part are you trying to make sure is worth it for you?
-
-Closing Direction:
-Shift the conversation away from price and toward transformation, outcomes, and certainty.
-      `);
+      setResult({
+        objectionType: "Budget Resistance",
+        emotionalState: "Interested but financially cautious",
+        intentScore: "78%",
+        hiddenMeaning:
+          "The prospect likely sees value, but emotionally associates the investment with risk.",
+        strategy:
+          "Increase certainty and reframe the investment around outcomes.",
+        bestResponse:
+          "I completely understand — and honestly, most people who ended up getting the strongest results initially felt the exact same way.",
+        closingDirection:
+          "Shift the conversation away from price and toward transformation and ROI."
+      });
 
     // THINK ABOUT IT
     } else if (
       text.includes("think") ||
       text.includes("let me think")
     ) {
-      setResult(`
-Objection Type: Trust / Internal Uncertainty
-
-Emotional State:
-Cautious but emotionally engaged
-
-Intent Score:
-72/100
-
-Hidden Meaning:
-The prospect is rarely asking for time alone — they are usually asking for emotional certainty.
-There is likely an unresolved concern they haven’t fully verbalized yet.
-
-Recommended Strategy:
-Lower pressure while uncovering the real hesitation.
-
-Best Response:
-Absolutely, that makes complete sense.
-
-And usually when someone says they want to think about it, there’s normally one specific part they’re still trying to feel fully comfortable with.
-
-For you personally, what do you feel is the biggest thing still on your mind right now?
-
-Closing Direction:
-Help the prospect verbalize the true concern instead of ending the conversation prematurely.
-      `);
+      setResult({
+        objectionType: "Trust / Internal Uncertainty",
+        emotionalState: "Cautious but emotionally engaged",
+        intentScore: "72%",
+        hiddenMeaning:
+          "The prospect is looking for emotional certainty before committing.",
+        strategy:
+          "Lower pressure while uncovering the real hesitation.",
+        bestResponse:
+          "Absolutely, that makes complete sense. Usually when someone says they want to think about it, there’s one specific thing they still want clarity on.",
+        closingDirection:
+          "Help the prospect verbalize the true concern."
+      });
 
     // TIMING
     } else if (
@@ -82,94 +56,57 @@ Help the prospect verbalize the true concern instead of ending the conversation 
       text.includes("not now") ||
       text.includes("bad timing")
     ) {
-      setResult(`
-Objection Type: Timing Objection
-
-Emotional State:
-Interested but low urgency
-
-Intent Score:
-65/100
-
-Hidden Meaning:
-The prospect does not yet emotionally connect the problem with immediate action.
-This is often a priority positioning issue rather than a true timing issue.
-
-Recommended Strategy:
-Increase urgency carefully without sounding pushy.
-
-Best Response:
-Totally understandable.
-
-Usually when people say “later,” it’s because the problem hasn’t yet become painful enough to feel urgent right now.
-
-Out of curiosity, what would realistically need to happen for this to become more important sooner rather than later?
-
-Closing Direction:
-Help the prospect connect future consequences to present action.
-      `);
+      setResult({
+        objectionType: "Timing Objection",
+        emotionalState: "Interested but low urgency",
+        intentScore: "65%",
+        hiddenMeaning:
+          "The prospect does not emotionally connect the issue with immediate action.",
+        strategy:
+          "Increase urgency carefully without sounding pushy.",
+        bestResponse:
+          "Totally understandable. Usually when people say later, it’s because the issue hasn’t become painful enough yet.",
+        closingDirection:
+          "Help the prospect connect future consequences to present action."
+      });
 
     // BUSY
     } else if (
       text.includes("busy") ||
       text.includes("too much going on")
     ) {
-      setResult(`
-Objection Type: Priority Overload
-
-Emotional State:
-Mentally overwhelmed
-
-Intent Score:
-60/100
-
-Hidden Meaning:
-The prospect may actually be interested, but emotionally feels overloaded and unable to process another decision right now.
-
-Recommended Strategy:
-Position your solution as simplification and relief.
-
-Best Response:
-I completely understand.
-
-Honestly, the busiest people are usually the ones who benefit the most from solving problems that are already draining their time, energy, or focus.
-
-The goal here wouldn’t be to add more to your plate — it would actually be to remove friction and make things easier long term.
-
-Closing Direction:
-Reduce emotional overwhelm and frame the solution as support rather than additional effort.
-      `);
+      setResult({
+        objectionType: "Priority Overload",
+        emotionalState: "Mentally overwhelmed",
+        intentScore: "60%",
+        hiddenMeaning:
+          "The prospect feels overloaded and unable to process another decision.",
+        strategy:
+          "Position the solution as relief and simplification.",
+        bestResponse:
+          "I completely understand. The busiest people are often the ones who benefit the most from reducing friction and wasted energy.",
+        closingDirection:
+          "Frame the solution as support, not additional work."
+      });
 
     // NOT INTERESTED
     } else if (
       text.includes("not interested") ||
       text.includes("no interest")
     ) {
-      setResult(`
-Objection Type: Low Perceived Value
-
-Emotional State:
-Dismissive or emotionally disconnected
-
-Intent Score:
-32/100
-
-Hidden Meaning:
-The prospect likely does not yet understand the personal relevance or emotional impact of the solution.
-
-Recommended Strategy:
-Rebuild curiosity instead of pushing harder.
-
-Best Response:
-Totally fair.
-
-And honestly, most people are not immediately interested in something until they clearly see how it directly connects to a problem, frustration, or goal they actually care about.
-
-Out of curiosity, what’s currently your biggest challenge around this area right now?
-
-Closing Direction:
-Move the conversation from rejection toward self-discovery and relevance.
-      `);
+      setResult({
+        objectionType: "Low Perceived Value",
+        emotionalState: "Dismissive or disconnected",
+        intentScore: "32%",
+        hiddenMeaning:
+          "The prospect does not yet see the emotional relevance of the solution.",
+        strategy:
+          "Rebuild curiosity instead of pushing harder.",
+        bestResponse:
+          "Totally fair. Most people only become interested once they clearly see how something connects to a real challenge they care about.",
+        closingDirection:
+          "Move the conversation toward self-discovery."
+      });
 
     // SEND INFO
     } else if (
@@ -177,32 +114,19 @@ Move the conversation from rejection toward self-discovery and relevance.
       text.includes("information") ||
       text.includes("email")
     ) {
-      setResult(`
-Objection Type: Information Request / Soft Avoidance
-
-Emotional State:
-Interested but emotionally disengaging from commitment
-
-Intent Score:
-64/100
-
-Hidden Meaning:
-The prospect is curious, but wants psychological distance before making a decision.
-This is often a polite way to avoid pressure while keeping the conversation open.
-
-Recommended Strategy:
-Keep control of the conversation while lowering pressure.
-
-Best Response:
-Absolutely — happy to send everything over.
-
-Just before I do, usually when someone asks for information, there’s one specific thing they’re trying to better understand before feeling comfortable moving forward.
-
-For you, what would that be?
-
-Closing Direction:
-Avoid losing momentum. Re-engage the prospect emotionally before ending the interaction.
-      `);
+      setResult({
+        objectionType: "Information Request / Soft Avoidance",
+        emotionalState: "Interested but disengaging",
+        intentScore: "64%",
+        hiddenMeaning:
+          "The prospect wants psychological distance before committing.",
+        strategy:
+          "Keep engagement active while lowering pressure.",
+        bestResponse:
+          "Absolutely — happy to send everything over. Before I do, what specifically would you like to better understand first?",
+        closingDirection:
+          "Avoid losing momentum before the interaction ends."
+      });
 
     // AUTHORITY
     } else if (
@@ -211,31 +135,19 @@ Avoid losing momentum. Re-engage the prospect emotionally before ending the inte
       text.includes("wife") ||
       text.includes("husband")
     ) {
-      setResult(`
-Objection Type: Authority / External Validation
-
-Emotional State:
-Interested but dependent on reassurance from others
-
-Intent Score:
-74/100
-
-Hidden Meaning:
-The prospect may emotionally want the solution, but seeks safety through external approval before committing.
-
-Recommended Strategy:
-Help them emotionally prepare to present the decision internally.
-
-Best Response:
-Of course — that makes complete sense.
-
-And usually when someone wants to discuss it with a partner or decision-maker, there are normally a few key things that person will care most about.
-
-What do you think would matter most to them when evaluating this?
-
-Closing Direction:
-Turn the prospect into an internal advocate instead of losing momentum.
-      `);
+      setResult({
+        objectionType: "Authority / External Validation",
+        emotionalState: "Interested but dependent on approval",
+        intentScore: "74%",
+        hiddenMeaning:
+          "The prospect wants external reassurance before deciding.",
+        strategy:
+          "Help the prospect internally justify the decision.",
+        bestResponse:
+          "Of course — that makes complete sense. What do you think will matter most to them when evaluating this?",
+        closingDirection:
+          "Turn the prospect into an internal advocate."
+      });
 
     // COMPETITOR
     } else if (
@@ -243,62 +155,56 @@ Turn the prospect into an internal advocate instead of losing momentum.
       text.includes("another provider") ||
       text.includes("already have")
     ) {
-      setResult(`
-Objection Type: Existing Solution / Competitor
-
-Emotional State:
-Comfortable but open-minded
-
-Intent Score:
-67/100
-
-Hidden Meaning:
-The prospect fears the risk and inconvenience of switching more than they value potential improvement.
-
-Recommended Strategy:
-Expose emotional dissatisfaction and identify gaps.
-
-Best Response:
-That actually makes a lot of sense.
-
-And usually when companies already have a solution in place, the biggest opportunities come from the things they’ve simply learned to tolerate over time.
-
-Out of curiosity, if you could improve one thing about your current solution, what would it be?
-
-Closing Direction:
-Shift the focus from loyalty to unmet needs and hidden frustrations.
-      `);
+      setResult({
+        objectionType: "Existing Solution / Competitor",
+        emotionalState: "Comfortable but open-minded",
+        intentScore: "67%",
+        hiddenMeaning:
+          "The prospect fears switching risk more than missing improvement.",
+        strategy:
+          "Identify dissatisfaction and hidden frustrations.",
+        bestResponse:
+          "That makes sense. If you could improve one thing about your current solution, what would it be?",
+        closingDirection:
+          "Shift focus toward gaps in the current setup."
+      });
 
     // DEFAULT
     } else {
-      setResult(`
-Objection Type: Complex / Unclear Objection
-
-Emotional State:
-Undetermined
-
-Intent Score:
-50/100
-
-Hidden Meaning:
-The objection may contain multiple emotional layers that require clarification before responding strategically.
-
-Recommended Strategy:
-Slow the conversation down and gather context.
-
-Best Response:
-I completely understand.
-
-Just so I respond in the most helpful way possible, can you walk me through what specifically is making you hesitate right now?
-
-Closing Direction:
-Gather emotional context before attempting to persuade.
-      `);
+      setResult({
+        objectionType: "Complex / Unclear Objection",
+        emotionalState: "Undetermined",
+        intentScore: "50%",
+        hiddenMeaning:
+          "The objection contains multiple emotional layers that require clarification.",
+        strategy:
+          "Slow the conversation down and gather context.",
+        bestResponse:
+          "Just so I can respond in the most helpful way possible, what specifically is making you hesitate right now?",
+        closingDirection:
+          "Gather emotional context before persuading."
+      });
     }
   };
 
   const copyResult = async () => {
-    await navigator.clipboard.writeText(result);
+    const textToCopy = `
+Objection Type: ${result.objectionType}
+
+Emotional State: ${result.emotionalState}
+
+Intent Score: ${result.intentScore}
+
+Hidden Meaning: ${result.hiddenMeaning}
+
+Strategy: ${result.strategy}
+
+Best Response: ${result.bestResponse}
+
+Closing Direction: ${result.closingDirection}
+    `;
+
+    await navigator.clipboard.writeText(textToCopy);
 
     setCopied(true);
 
@@ -369,17 +275,111 @@ Gather emotional context before attempting to persuade.
         <div
           style={{
             marginTop: "35px",
-            display: "flex",
-            flexDirection: "column",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
             gap: "20px"
           }}
         >
           <div
             style={{
               background: "#111827",
-              padding: "24px",
-              borderRadius: "18px",
-              border: "1px solid #1F2937"
+              padding: "20px",
+              borderRadius: "16px"
+            }}
+          >
+            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+              Objection Type
+            </div>
+
+            <div
+              style={{
+                marginTop: "8px",
+                color: "#A78BFA",
+                fontSize: "22px",
+                fontWeight: "bold"
+              }}
+            >
+              {result.objectionType}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#111827",
+              padding: "20px",
+              borderRadius: "16px"
+            }}
+          >
+            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+              Emotional State
+            </div>
+
+            <div style={{ marginTop: "8px" }}>
+              {result.emotionalState}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#111827",
+              padding: "20px",
+              borderRadius: "16px"
+            }}
+          >
+            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+              Intent Score
+            </div>
+
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "24px",
+                fontWeight: "bold"
+              }}
+            >
+              {result.intentScore}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#111827",
+              padding: "20px",
+              borderRadius: "16px"
+            }}
+          >
+            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+              Strategy
+            </div>
+
+            <div style={{ marginTop: "8px" }}>
+              {result.strategy}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#111827",
+              padding: "20px",
+              borderRadius: "16px",
+              gridColumn: "span 2"
+            }}
+          >
+            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+              Hidden Meaning
+            </div>
+
+            <div style={{ marginTop: "8px", lineHeight: "1.7" }}>
+              {result.hiddenMeaning}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#111827",
+              padding: "20px",
+              borderRadius: "16px",
+              gridColumn: "span 2"
             }}
           >
             <div
@@ -389,9 +389,9 @@ Gather emotional context before attempting to persuade.
                 alignItems: "center"
               }}
             >
-              <h2 style={{ color: "#A78BFA" }}>
-                AI Analysis
-              </h2>
+              <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+                Best Response
+              </div>
 
               <button
                 onClick={copyResult}
@@ -411,34 +411,29 @@ Gather emotional context before attempting to persuade.
 
             <div
               style={{
-                marginTop: "20px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px"
+                marginTop: "12px",
+                lineHeight: "1.8",
+                whiteSpace: "pre-wrap"
               }}
             >
-              <div
-                style={{
-                  background: "#1F2937",
-                  padding: "16px",
-                  borderRadius: "12px"
-                }}
-              >
-                <div style={{ color: "#9CA3AF", fontSize: "14px" }}>
-                  AI Response
-                </div>
+              {result.bestResponse}
+            </div>
+          </div>
 
-                <div
-                  style={{
-                    marginTop: "8px",
-                    lineHeight: "1.8",
-                    color: "#E5E7EB",
-                    whiteSpace: "pre-wrap"
-                  }}
-                >
-                  {result}
-                </div>
-              </div>
+          <div
+            style={{
+              background: "#111827",
+              padding: "20px",
+              borderRadius: "16px",
+              gridColumn: "span 2"
+            }}
+          >
+            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
+              Closing Direction
+            </div>
+
+            <div style={{ marginTop: "8px" }}>
+              {result.closingDirection}
             </div>
           </div>
         </div>
