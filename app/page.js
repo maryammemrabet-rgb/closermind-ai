@@ -7,38 +7,99 @@ export default function Home() {
   const [result, setResult] = useState("");
 
   const analyzeObjection = () => {
-    if (input.toLowerCase().includes("expensive")) {
+    const text = input.toLowerCase();
+
+    // BUDGET
+    if (text.includes("expensive") || text.includes("budget")) {
       setResult(`
 Objection Type: Budget
 
-Hidden Meaning:
-The prospect is interested but unsure about the ROI.
+Emotional State:
+Interested but hesitant
 
-Recommended Response:
-I completely understand. Most people felt the same initially until they saw the long-term value and results.
+Intent Score:
+78/100
+
+Hidden Meaning:
+The prospect sees potential value but is unsure about ROI.
+
+Recommended Strategy:
+Value reframing + ROI focus
+
+Best Response:
+I completely understand. Most people initially felt the same way until they saw how quickly the investment translated into results.
 
 Closing Direction:
-Reframe value instead of defending price.
+Focus on long-term value instead of price.
       `);
-    } else if (input.toLowerCase().includes("think")) {
+
+    // THINK
+    } else if (text.includes("think")) {
       setResult(`
 Objection Type: Trust / Uncertainty
+
+Emotional State:
+Cautious but interested
+
+Intent Score:
+72/100
 
 Hidden Meaning:
 The prospect needs reassurance before committing.
 
-Recommended Response:
-Of course, that makes sense. Just so I understand better, what part would you like to think through more carefully?
+Recommended Strategy:
+Clarify hesitation
+
+Best Response:
+Absolutely, that makes sense. Just so I understand better, what part would you like to think through more carefully?
 
 Closing Direction:
-Clarify the real hesitation.
+Identify the real concern behind the hesitation.
       `);
+
+    // TIMING
+    } else if (text.includes("later") || text.includes("not now")) {
+      setResult(`
+Objection Type: Timing
+
+Emotional State:
+Interested but low urgency
+
+Intent Score:
+65/100
+
+Hidden Meaning:
+The prospect does not yet see why action is urgent.
+
+Recommended Strategy:
+Create urgency carefully
+
+Best Response:
+Totally understand. Out of curiosity, what usually changes between now and later that would make this more relevant?
+
+Closing Direction:
+Increase urgency without pressure.
+      `);
+
+    // DEFAULT
     } else {
       setResult(`
 Objection Type: General Objection
 
-Recommended Response:
+Emotional State:
+Unclear
+
+Intent Score:
+50/100
+
+Recommended Strategy:
+Clarify concern
+
+Best Response:
 Can you tell me a bit more about your concern so I can better help?
+
+Closing Direction:
+Gather more context before responding.
       `);
     }
   };
@@ -104,4 +165,3 @@ Can you tell me a bit more about your concern so I can better help?
     </div>
   );
 }
-
