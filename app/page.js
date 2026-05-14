@@ -411,13 +411,34 @@ Gather emotional context before attempting to persuade.
 
             <div
               style={{
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.8",
-                color: "#E5E7EB",
-                marginTop: "15px"
+                marginTop: "20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px"
               }}
             >
-              {result}
+              <div
+                style={{
+                  background: "#1F2937",
+                  padding: "16px",
+                  borderRadius: "12px"
+                }}
+              >
+                <div style={{ color: "#9CA3AF", fontSize: "14px" }}>
+                  AI Response
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "8px",
+                    lineHeight: "1.8",
+                    color: "#E5E7EB",
+                    whiteSpace: "pre-wrap"
+                  }}
+                >
+                  {result}
+                </div>
+              </div>
             </div>
           </div>
         </div>
