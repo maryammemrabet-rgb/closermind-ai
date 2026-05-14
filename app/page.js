@@ -280,6 +280,7 @@ Closing Direction: ${result.closingDirection}
             gap: "20px"
           }}
         >
+          {/* Objection Type */}
           <div
             style={{
               background: "#111827",
@@ -303,6 +304,7 @@ Closing Direction: ${result.closingDirection}
             </div>
           </div>
 
+          {/* Emotional State */}
           <div
             style={{
               background: "#111827",
@@ -314,11 +316,64 @@ Closing Direction: ${result.closingDirection}
               Emotional State
             </div>
 
-            <div style={{ marginTop: "8px" }}>
+            <div
+              style={{
+                marginTop: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                background:
+                  result.intentScore === "78%" ||
+                  result.intentScore === "74%" ||
+                  result.intentScore === "72%"
+                    ? "rgba(34,197,94,0.15)"
+                    : result.intentScore === "65%" ||
+                      result.intentScore === "64%" ||
+                      result.intentScore === "60%" ||
+                      result.intentScore === "67%"
+                    ? "rgba(234,179,8,0.15)"
+                    : "rgba(239,68,68,0.15)",
+                color:
+                  result.intentScore === "78%" ||
+                  result.intentScore === "74%" ||
+                  result.intentScore === "72%"
+                    ? "#4ADE80"
+                    : result.intentScore === "65%" ||
+                      result.intentScore === "64%" ||
+                      result.intentScore === "60%" ||
+                      result.intentScore === "67%"
+                    ? "#FACC15"
+                    : "#F87171",
+                padding: "10px 16px",
+                borderRadius: "999px",
+                fontWeight: "bold",
+                width: "fit-content"
+              }}
+            >
+              <div
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background:
+                    result.intentScore === "78%" ||
+                    result.intentScore === "74%" ||
+                    result.intentScore === "72%"
+                      ? "#4ADE80"
+                      : result.intentScore === "65%" ||
+                        result.intentScore === "64%" ||
+                        result.intentScore === "60%" ||
+                        result.intentScore === "67%"
+                      ? "#FACC15"
+                      : "#F87171"
+                }}
+              />
+
               {result.emotionalState}
             </div>
           </div>
 
+          {/* Intent Score */}
           <div
             style={{
               background: "#111827",
@@ -378,6 +433,7 @@ Closing Direction: ${result.closingDirection}
             </div>
           </div>
 
+          {/* Strategy */}
           <div
             style={{
               background: "#111827",
@@ -394,6 +450,7 @@ Closing Direction: ${result.closingDirection}
             </div>
           </div>
 
+          {/* Hidden Meaning */}
           <div
             style={{
               background: "#111827",
@@ -411,6 +468,7 @@ Closing Direction: ${result.closingDirection}
             </div>
           </div>
 
+          {/* Best Response */}
           <div
             style={{
               background: "#111827",
@@ -457,6 +515,7 @@ Closing Direction: ${result.closingDirection}
             </div>
           </div>
 
+          {/* Closing Direction */}
           <div
             style={{
               background: "#111827",
@@ -477,5 +536,6 @@ Closing Direction: ${result.closingDirection}
       )}
     </div>
   );
+}
 }
        
