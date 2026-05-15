@@ -1,539 +1,581 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+
+import {
+  Brain,
+  BadgeDollarSign,
+  HeartHandshake,
+  Target,
+  MessageSquareQuote,
+  Download,
+  Copy,
+} from "lucide-react";
+
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+
+import { db } from "../firebase";
 
 export default function Home() {
-  const [input, setInput] = useState("");
-  const [result, setResult] = useState(null);
+
+  const { user } = useUser();
+
+  const [objection, setObjection] = useState("");
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [tone, setTone] = useState("Consultative");
+  const [history, setHistory] = useState([]);
   const [copied, setCopied] = useState(false);
 
-  const analyzeObjection = () => {
-    const text = input.toLowerCase();
+  // LOAD HISTORY FROM FIREBASE
 
-    // BUDGET
-    if (
-      text.includes("expensive") ||
-      text.includes("budget") ||
-      text.includes("too much") ||
-      text.includes("price")
-    ) {
-      setResult({
-        objectionType: "Budget Resistance",
-        emotionalState: "Interested but financially cautious",
-        intentScore: "78%",
-        hiddenMeaning:
-          "The prospect likely sees value, but emotionally associates the investment with risk.",
-        strategy:
-          "Increase certainty and reframe the investment around outcomes.",
-        bestResponse:
-          "I completely understand — and honestly, most people who ended up getting the strongest results initially felt the exact same way.",
-        closingDirection:
-          "Shift the conversation away from price and toward transformation and ROI."
+  useEffect(() => {
+
+    const loadHistory = async () => {
+
+      if (!user) return;
+
+      try {
+
+        const q = query(
+          collection(db, "analyses"),
+          where("userId", "==", user.id)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        const items = [];
+
+        querySnapshot.forEach((doc) => {
+          items.push(doc.data());
+        });
+
+        setHistory(items.reverse());
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    };
+
+    loadHistory();
+
+  }, [user]);
+
+  // ANALYZE
+
+  const analyzeObjection = async () => {
+
+    if (!objection) return;
+
+    setLoading(true);
+
+    try {
+
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          objection,
+          tone,
+        }),
       });
 
-    // THINK ABOUT IT
-    } else if (
-      text.includes("think") ||
-      text.includes("let me think")
-    ) {
-      setResult({
-        objectionType: "Trust / Internal Uncertainty",
-        emotionalState: "Cautious but emotionally engaged",
-        intentScore: "72%",
-        hiddenMeaning:
-          "The prospect is looking for emotional certainty before committing.",
-        strategy:
-          "Lower pressure while uncovering the real hesitation.",
-        bestResponse:
-          "Absolutely, that makes complete sense. Usually when someone says they want to think about it, there’s one specific thing they still want clarity on.",
-        closingDirection:
-          "Help the prospect verbalize the true concern."
-      });
+      const data = await res.json();
 
-    // TIMING
-    } else if (
-      text.includes("later") ||
-      text.includes("not now") ||
-      text.includes("bad timing")
-    ) {
-      setResult({
-        objectionType: "Timing Objection",
-        emotionalState: "Interested but low urgency",
-        intentScore: "65%",
-        hiddenMeaning:
-          "The prospect does not emotionally connect the issue with immediate action.",
-        strategy:
-          "Increase urgency carefully without sounding pushy.",
-        bestResponse:
-          "Totally understandable. Usually when people say later, it’s because the issue hasn’t become painful enough yet.",
-        closingDirection:
-          "Help the prospect connect future consequences to present action."
-      });
+      const aiResult = data.result || data;
 
-    // BUSY
-    } else if (
-      text.includes("busy") ||
-      text.includes("too much going on")
-    ) {
-      setResult({
-        objectionType: "Priority Overload",
-        emotionalState: "Mentally overwhelmed",
-        intentScore: "60%",
-        hiddenMeaning:
-          "The prospect feels overloaded and unable to process another decision.",
-        strategy:
-          "Position the solution as relief and simplification.",
-        bestResponse:
-          "I completely understand. The busiest people are often the ones who benefit the most from reducing friction and wasted energy.",
-        closingDirection:
-          "Frame the solution as support, not additional work."
-      });
+      setAnalysis(aiResult);
 
-    // NOT INTERESTED
-    } else if (
-      text.includes("not interested") ||
-      text.includes("no interest")
-    ) {
-      setResult({
-        objectionType: "Low Perceived Value",
-        emotionalState: "Dismissive or disconnected",
-        intentScore: "32%",
-        hiddenMeaning:
-          "The prospect does not yet see the emotional relevance of the solution.",
-        strategy:
-          "Rebuild curiosity instead of pushing harder.",
-        bestResponse:
-          "Totally fair. Most people only become interested once they clearly see how something connects to a real challenge they care about.",
-        closingDirection:
-          "Move the conversation toward self-discovery."
-      });
+      const newItem = {
+        objection,
+        tone,
+        result: aiResult,
+        date: new Date().toLocaleString(),
+        userId: user?.id || "guest",
+      };
 
-    // SEND INFO
-    } else if (
-      text.includes("send") ||
-      text.includes("information") ||
-      text.includes("email")
-    ) {
-      setResult({
-        objectionType: "Information Request / Soft Avoidance",
-        emotionalState: "Interested but disengaging",
-        intentScore: "64%",
-        hiddenMeaning:
-          "The prospect wants psychological distance before committing.",
-        strategy:
-          "Keep engagement active while lowering pressure.",
-        bestResponse:
-          "Absolutely — happy to send everything over. Before I do, what specifically would you like to better understand first?",
-        closingDirection:
-          "Avoid losing momentum before the interaction ends."
-      });
+      // SAVE TO FIREBASE
 
-    // AUTHORITY
-    } else if (
-      text.includes("partner") ||
-      text.includes("boss") ||
-      text.includes("wife") ||
-      text.includes("husband")
-    ) {
-      setResult({
-        objectionType: "Authority / External Validation",
-        emotionalState: "Interested but dependent on approval",
-        intentScore: "74%",
-        hiddenMeaning:
-          "The prospect wants external reassurance before deciding.",
-        strategy:
-          "Help the prospect internally justify the decision.",
-        bestResponse:
-          "Of course — that makes complete sense. What do you think will matter most to them when evaluating this?",
-        closingDirection:
-          "Turn the prospect into an internal advocate."
-      });
+      if (user) {
 
-    // COMPETITOR
-    } else if (
-      text.includes("already using") ||
-      text.includes("another provider") ||
-      text.includes("already have")
-    ) {
-      setResult({
-        objectionType: "Existing Solution / Competitor",
-        emotionalState: "Comfortable but open-minded",
-        intentScore: "67%",
-        hiddenMeaning:
-          "The prospect fears switching risk more than missing improvement.",
-        strategy:
-          "Identify dissatisfaction and hidden frustrations.",
-        bestResponse:
-          "That makes sense. If you could improve one thing about your current solution, what would it be?",
-        closingDirection:
-          "Shift focus toward gaps in the current setup."
-      });
+        await addDoc(
+          collection(db, "analyses"),
+          newItem
+        );
 
-    // DEFAULT
-    } else {
-      setResult({
-        objectionType: "Complex / Unclear Objection",
-        emotionalState: "Undetermined",
-        intentScore: "50%",
-        hiddenMeaning:
-          "The objection contains multiple emotional layers that require clarification.",
-        strategy:
-          "Slow the conversation down and gather context.",
-        bestResponse:
-          "Just so I can respond in the most helpful way possible, what specifically is making you hesitate right now?",
-        closingDirection:
-          "Gather emotional context before persuading."
-      });
+      }
+
+      setHistory((prev) => [newItem, ...prev]);
+
+    } catch (error) {
+
+      console.error(error);
+
     }
+
+    setLoading(false);
+
   };
 
-  const copyResult = async () => {
-    const textToCopy = `
-Objection Type: ${result.objectionType}
+  // EXPORT PDF
 
-Emotional State: ${result.emotionalState}
+  const exportPDF = () => {
 
-Intent Score: ${result.intentScore}
+    if (!analysis) return;
 
-Hidden Meaning: ${result.hiddenMeaning}
+    const doc = new jsPDF();
 
-Strategy: ${result.strategy}
+    doc.setFontSize(22);
+    doc.text("Closermind AI Report", 20, 20);
 
-Best Response: ${result.bestResponse}
+    doc.setFontSize(14);
 
-Closing Direction: ${result.closingDirection}
-    `;
+    doc.text(`Tone: ${tone}`, 20, 40);
 
-    await navigator.clipboard.writeText(textToCopy);
+    doc.text(
+      `Objection Type: ${analysis.objectionType}`,
+      20,
+      60
+    );
+
+    doc.text(
+      `Emotional State: ${analysis.emotionalState}`,
+      20,
+      80
+    );
+
+    const hiddenMeaning = doc.splitTextToSize(
+      analysis.hiddenMeaning || "",
+      170
+    );
+
+    doc.text("Hidden Meaning:", 20, 100);
+    doc.text(hiddenMeaning, 20, 110);
+
+    const strategy = doc.splitTextToSize(
+      analysis.recommendedStrategy || "",
+      170
+    );
+
+    doc.text("Recommended Strategy:", 20, 150);
+    doc.text(strategy, 20, 160);
+
+    const response = doc.splitTextToSize(
+      analysis.bestResponse || "",
+      170
+    );
+
+    doc.text("Best Response:", 20, 210);
+    doc.text(response, 20, 220);
+
+    doc.save("closermind-analysis.pdf");
+
+  };
+
+  // COPY ANALYSIS
+
+  const copyAnalysis = async () => {
+
+    if (!analysis) return;
+
+    const text = `
+Objection Type:
+${analysis.objectionType}
+
+Hidden Meaning:
+${analysis.hiddenMeaning}
+
+Emotional State:
+${analysis.emotionalState}
+
+Buying Intent:
+${analysis.buyingIntent}
+
+Recommended Strategy:
+${analysis.recommendedStrategy}
+
+Best Response:
+${analysis.bestResponse}
+`;
+
+    await navigator.clipboard.writeText(text);
 
     setCopied(true);
 
     setTimeout(() => {
       setCopied(false);
     }, 2000);
+
   };
 
   return (
-    <div
-      style={{
-        background: "#0B0F19",
-        color: "white",
-        minHeight: "100vh",
-        padding: "40px",
-        fontFamily: "Arial"
-      }}
-    >
-      <h1 style={{ fontSize: "42px" }}>
-        CloserMind AI
-      </h1>
 
-      <p
-        style={{
-          color: "#9CA3AF",
-          marginTop: "-10px",
-          marginBottom: "30px"
-        }}
-      >
-        AI Objection & Closing Assistant
-      </p>
+    <main className="min-h-screen bg-black text-white overflow-hidden">
 
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Paste objection here..."
-        style={{
-          width: "100%",
-          height: "180px",
-          padding: "20px",
-          borderRadius: "16px",
-          border: "1px solid #1F2937",
-          fontSize: "16px",
-          background: "#111827",
-          color: "white",
-          outline: "none"
-        }}
-      />
+      {/* BACKGROUND */}
 
-      <button
-        onClick={analyzeObjection}
-        style={{
-          marginTop: "20px",
-          padding: "14px 24px",
-          background: "#6D5EF6",
-          color: "white",
-          border: "none",
-          borderRadius: "12px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontWeight: "bold"
-        }}
-      >
-        Analyze Objection
-      </button>
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-black to-black z-0" />
 
-      {result && (
-        <div
-          style={{
-            marginTop: "35px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "20px"
-          }}
-        >
-          {/* Objection Type */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px"
-            }}
-          >
-            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-              Objection Type
-            </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
 
-            <div
-              style={{
-                marginTop: "8px",
-                color: "#A78BFA",
-                fontSize: "22px",
-                fontWeight: "bold"
-              }}
+        {/* AUTH */}
+
+        <div className="flex justify-end items-center gap-4 mb-8">
+
+          <SignedOut>
+
+            <SignInButton mode="modal">
+              <button className="bg-white/10 hover:bg-white/20 transition-all px-5 py-2 rounded-xl border border-white/10">
+                Sign In
+              </button>
+            </SignInButton>
+
+            <SignUpButton mode="modal">
+              <button className="bg-purple-600 hover:bg-purple-700 transition-all px-5 py-2 rounded-xl font-bold">
+                Sign Up
+              </button>
+            </SignUpButton>
+
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+
+        </div>
+
+        {/* HEADER */}
+
+        <div className="text-center mb-16">
+
+          <h1 className="text-7xl font-black bg-gradient-to-r from-purple-400 to-purple-700 bg-clip-text text-transparent mb-6">
+            Closermind AI 🚀
+          </h1>
+
+          <p className="text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            AI-powered objection handling & elite sales psychology analysis
+          </p>
+
+        </div>
+
+        {/* INPUT */}
+
+        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-[40px] p-10 shadow-2xl mb-16">
+
+          <div className="mb-6">
+
+            <label className="block text-gray-300 mb-3 text-lg">
+              Select Closing Style
+            </label>
+
+            <select
+              value={tone}
+              onChange={(e) => setTone(e.target.value)}
+              className="w-full p-5 rounded-2xl bg-black/40 border border-white/10 text-white text-lg outline-none"
             >
-              {result.objectionType}
-            </div>
+
+              <option>Consultative</option>
+              <option>Aggressive Closer</option>
+              <option>Luxury Sales</option>
+              <option>B2B SaaS</option>
+              <option>Empathetic</option>
+              <option>Straight Line</option>
+
+            </select>
+
           </div>
 
-          {/* Emotional State */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px"
-            }}
+          <textarea
+            value={objection}
+            onChange={(e) => setObjection(e.target.value)}
+            placeholder="Paste customer objection here..."
+            className="w-full h-56 bg-black/40 border border-white/10 rounded-3xl p-6 text-xl text-white mb-8 outline-none resize-none"
+          />
+
+          <button
+            onClick={analyzeObjection}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-purple-600 to-purple-800 hover:scale-[1.01] transition-all duration-300 rounded-3xl py-6 text-3xl font-bold shadow-[0_0_40px_rgba(168,85,247,0.35)]"
           >
-            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-              Emotional State
-            </div>
 
-            <div
-              style={{
-                marginTop: "12px",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "10px",
-                background:
-                  result.intentScore === "78%" ||
-                  result.intentScore === "74%" ||
-                  result.intentScore === "72%"
-                    ? "rgba(34,197,94,0.15)"
-                    : result.intentScore === "65%" ||
-                      result.intentScore === "64%" ||
-                      result.intentScore === "60%" ||
-                      result.intentScore === "67%"
-                    ? "rgba(234,179,8,0.15)"
-                    : "rgba(239,68,68,0.15)",
-                color:
-                  result.intentScore === "78%" ||
-                  result.intentScore === "74%" ||
-                  result.intentScore === "72%"
-                    ? "#4ADE80"
-                    : result.intentScore === "65%" ||
-                      result.intentScore === "64%" ||
-                      result.intentScore === "60%" ||
-                      result.intentScore === "67%"
-                    ? "#FACC15"
-                    : "#F87171",
-                padding: "10px 16px",
-                borderRadius: "999px",
-                fontWeight: "bold",
-                width: "fit-content"
-              }}
-            >
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  background:
-                    result.intentScore === "78%" ||
-                    result.intentScore === "74%" ||
-                    result.intentScore === "72%"
-                      ? "#4ADE80"
-                      : result.intentScore === "65%" ||
-                        result.intentScore === "64%" ||
-                        result.intentScore === "60%" ||
-                        result.intentScore === "67%"
-                      ? "#FACC15"
-                      : "#F87171"
-                }}
-              />
+            {loading ? "Analyzing..." : "Analyze Objection"}
 
-              {result.emotionalState}
-            </div>
-          </div>
+          </button>
 
-          {/* Intent Score */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px"
-            }}
-          >
-            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-              Intent Score
-            </div>
+        </div>
 
-            <div
-              style={{
-                marginTop: "12px"
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px"
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: "bold"
-                  }}
-                >
-                  {result.intentScore}
-                </span>
+        {/* RESULTS */}
 
-                <span style={{ color: "#9CA3AF" }}>
-                  Buying Intent
-                </span>
-              </div>
+        {analysis && (
 
-              <div
-                style={{
-                  width: "100%",
-                  height: "10px",
-                  background: "#1F2937",
-                  borderRadius: "999px",
-                  overflow: "hidden"
-                }}
-              >
-                <div
-                  style={{
-                    width: result.intentScore,
-                    height: "100%",
-                    background: "#6D5EF6",
-                    borderRadius: "999px",
-                    transition: "all 0.5s ease"
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <div className="space-y-8 mb-20">
 
-          {/* Strategy */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px"
-            }}
-          >
-            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-              Strategy
-            </div>
+            {/* ACTIONS */}
 
-            <div style={{ marginTop: "8px" }}>
-              {result.strategy}
-            </div>
-          </div>
+            <div className="flex flex-wrap justify-center gap-4">
 
-          {/* Hidden Meaning */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px",
-              gridColumn: "span 2"
-            }}
-          >
-            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-              Hidden Meaning
-            </div>
-
-            <div style={{ marginTop: "8px", lineHeight: "1.7" }}>
-              {result.hiddenMeaning}
-            </div>
-          </div>
-
-          {/* Best Response */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px",
-              gridColumn: "span 2"
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center"
-              }}
-            >
-              <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-                Best Response
+              <div className="bg-purple-600/20 border border-purple-500/20 px-6 py-3 rounded-full font-bold text-lg backdrop-blur-xl">
+                {tone} Mode
               </div>
 
               <button
-                onClick={copyResult}
-                style={{
-                  background: "#6D5EF6",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 14px",
-                  borderRadius: "10px",
-                  cursor: "pointer",
-                  fontWeight: "bold"
-                }}
+                onClick={exportPDF}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 transition-all px-6 py-3 rounded-full font-bold text-lg"
               >
-                {copied ? "Copied!" : "Copy Response"}
+
+                <Download size={20} />
+                Export PDF
+
               </button>
+
+              <button
+                onClick={copyAnalysis}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-all px-6 py-3 rounded-full font-bold text-lg"
+              >
+
+                <Copy size={20} />
+                {copied ? "Copied!" : "Copy Analysis"}
+
+              </button>
+
             </div>
 
-            <div
-              style={{
-                marginTop: "12px",
-                lineHeight: "1.8",
-                whiteSpace: "pre-wrap"
-              }}
-            >
-              {result.bestResponse}
+            {/* GRID */}
+
+            <div className="grid md:grid-cols-2 gap-6">
+
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
+
+                <div className="flex items-center gap-3 mb-5">
+
+                  <Brain className="text-purple-400" size={32} />
+
+                  <h3 className="text-3xl font-bold text-purple-400">
+                    Objection Type
+                  </h3>
+
+                </div>
+
+                <p className="text-2xl text-gray-100">
+                  {analysis.objectionType}
+                </p>
+
+              </div>
+
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
+
+                <div className="flex items-center gap-3 mb-5">
+
+                  <HeartHandshake className="text-pink-400" size={32} />
+
+                  <h3 className="text-3xl font-bold text-pink-400">
+                    Emotional State
+                  </h3>
+
+                </div>
+
+                <p className="text-2xl text-gray-100 leading-relaxed">
+                  {analysis.emotionalState}
+                </p>
+
+              </div>
+
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
+
+                <div className="flex items-center gap-3 mb-5">
+
+                  <BadgeDollarSign className="text-green-400" size={32} />
+
+                  <h3 className="text-3xl font-bold text-green-400">
+                    Buying Intent
+                  </h3>
+
+                </div>
+
+                <div className="text-7xl font-black mb-6">
+                  {analysis.buyingIntent}
+                </div>
+
+              </div>
+
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
+
+                <div className="flex items-center gap-3 mb-5">
+
+                  <Target className="text-blue-400" size={32} />
+
+                  <h3 className="text-3xl font-bold text-blue-400">
+                    Hidden Meaning
+                  </h3>
+
+                </div>
+
+                <p className="text-xl text-gray-100 leading-relaxed">
+                  {analysis.hiddenMeaning}
+                </p>
+
+              </div>
+
             </div>
+
+            {/* STRATEGY */}
+
+            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10">
+
+              <div className="flex items-center gap-3 mb-6">
+
+                <Brain className="text-purple-400" size={34} />
+
+                <h3 className="text-4xl font-bold text-purple-400">
+                  Recommended Strategy
+                </h3>
+
+              </div>
+
+              <p className="text-2xl leading-relaxed text-gray-100">
+                {analysis.recommendedStrategy}
+              </p>
+
+            </div>
+
+            {/* BEST RESPONSE */}
+
+            <div className="bg-gradient-to-r from-purple-700 to-purple-500 rounded-3xl p-10">
+
+              <div className="flex items-center gap-3 mb-6">
+
+                <MessageSquareQuote size={34} />
+
+                <h3 className="text-4xl font-bold">
+                  Best Response
+                </h3>
+
+              </div>
+
+              <p className="text-3xl leading-relaxed font-medium">
+                {analysis.bestResponse}
+              </p>
+
+            </div>
+
           </div>
 
-          {/* Closing Direction */}
-          <div
-            style={{
-              background: "#111827",
-              padding: "20px",
-              borderRadius: "16px",
-              gridColumn: "span 2"
-            }}
-          >
-            <div style={{ color: "#9CA3AF", fontSize: "13px" }}>
-              Closing Direction
-            </div>
+        )}
 
-            <div style={{ marginTop: "8px" }}>
-              {result.closingDirection}
-            </div>
+        {/* HISTORY */}
+
+        <div className="mt-24">
+
+          <h2 className="text-5xl font-black bg-gradient-to-r from-purple-400 to-purple-700 bg-clip-text text-transparent mb-10">
+            History
+          </h2>
+
+          <div className="space-y-6">
+
+            {history.map((item, index) => (
+
+              <div
+                key={index}
+                className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6"
+              >
+
+                <div className="flex justify-between items-start mb-4">
+
+                  <div className="text-purple-400 font-bold text-xl">
+                    {item.tone}
+                  </div>
+
+                  <div className="text-gray-500 text-sm">
+                    {item.date}
+                  </div>
+
+                </div>
+
+                <p className="text-xl text-white mb-4">
+                  {item.objection}
+                </p>
+
+                {item.result && (
+
+                  <div className="grid md:grid-cols-2 gap-4 mt-6">
+
+                    <div className="bg-black/30 rounded-2xl p-4">
+                      <div className="text-purple-400 font-bold mb-2">
+                        Objection Type
+                      </div>
+
+                      <div>
+                        {item.result.objectionType}
+                      </div>
+                    </div>
+
+                    <div className="bg-black/30 rounded-2xl p-4">
+                      <div className="text-pink-400 font-bold mb-2">
+                        Emotional State
+                      </div>
+
+                      <div>
+                        {item.result.emotionalState}
+                      </div>
+                    </div>
+
+                    <div className="bg-black/30 rounded-2xl p-4">
+                      <div className="text-green-400 font-bold mb-2">
+                        Buying Intent
+                      </div>
+
+                      <div>
+                        {item.result.buyingIntent}
+                      </div>
+                    </div>
+
+                    <div className="bg-black/30 rounded-2xl p-4">
+                      <div className="text-blue-400 font-bold mb-2">
+                        Hidden Meaning
+                      </div>
+
+                      <div>
+                        {item.result.hiddenMeaning}
+                      </div>
+                    </div>
+
+                  </div>
+
+                )}
+
+              </div>
+
+            ))}
+
           </div>
+
         </div>
-      )}
-    </div>
+
+      </div>
+
+    </main>
+
   );
+
 }

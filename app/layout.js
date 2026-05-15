@@ -1,12 +1,27 @@
+import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+
 export const metadata = {
-  title: "CloserMind AI",
-  description: "AI Objection & Closing Assistant",
+  title: "Closermind AI",
+  description: "AI-powered objection handling assistant",
 };
 
 export default function RootLayout({ children }) {
+
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+
+    <ClerkProvider>
+
+      <html lang="en">
+
+        <body>
+          {children}
+        </body>
+
+      </html>
+
+    </ClerkProvider>
+
   );
+
 }
