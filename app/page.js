@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
 
 export default function Home() {
   const [objection, setObjection] = useState("");
@@ -71,14 +72,20 @@ export default function Home() {
 
         {/* TOP BUTTONS */}
         <div className="flex justify-end gap-4 mb-8">
-          <button className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl transition">
-            Sign In
-          </button>
 
-          <button className="bg-gradient-to-r from-purple-500 to-fuchsia-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition">
-            Sign Up
-          </button>
-        </div>
+  <SignInButton mode="modal">
+    <button className="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl transition">
+      Sign In
+    </button>
+  </SignInButton>
+
+  <SignUpButton mode="modal">
+    <button className="bg-gradient-to-r from-purple-500 to-fuchsia-600 px-6 py-3 rounded-xl font-semibold hover:scale-105 transition">
+      Sign Up
+    </button>
+  </SignUpButton>
+
+</div>
 
         {/* MAIN CARD */}
         <div className="bg-[#0d0d0d] border border-purple-900/30 rounded-3xl p-8 shadow-2xl">
