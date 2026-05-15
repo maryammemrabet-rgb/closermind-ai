@@ -1,50 +1,76 @@
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-export async function POST() {
+export async function POST(req) {
   try {
 
-    const session = await stripe.checkout.sessions.create({
+    const body = await req.json();
 
-      payment_method_types: ["card"],
+    const { objection, style } = body;
 
-      mode: "payment",
+    const prompt = `
+You are an elite sales psychology AI.
 
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
+Analyze this customer objection using the ${style} sales style.
 
-            product_data: {
-              name: "Closermind AI Pro",
-            },
+Customer objection:
+"${objection}"
 
-            unit_amount: 2900,
-          },
+Return ONLY valid JSON in this exact format:
 
-          quantity: 1,
+{
+  "objectionType": "",
+  "hiddenMeaning": "",
+  "emotionalState": "",
+  "buyingIntent": "",
+  "recommendedStrategy": "",
+  "bestResponse": ""
+}
+`;
+
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
-      ],
 
-      success_url:
-        "https://closermind-ai-xpay-i7gdizu2w-maryam-s-projects3.vercel.app/success",
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
 
-      cancel_url:
-        "https://closermind-ai-xpay-i7gdizu2w-maryam-s-projects3.vercel.app/cancel",
-    });
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
 
-    return Response.json({
-      url: session.url,
-    });
+          temperature: 0.7,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    const content =
+      data.choices?.[0]?.message?.content || "{}";
+
+    const parsed = JSON.parse(content);
+
+    return Response.json(parsed);
 
   } catch (error) {
 
     console.log(error);
 
     return Response.json(
-      { error: "Stripe checkout failed" },
-      { status: 500 }
+      {
+        error: "Analysis failed",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
