@@ -43,7 +43,29 @@ export default function Home() {
   const [history, setHistory] = useState([]);
   const [copied, setCopied] = useState(false);
 
-  // LOAD HISTORY FROM FIREBASE
+  // STRIPE CHECKOUT
+
+  const handleCheckout = async () => {
+
+    try {
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      window.location.href = data.url;
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+  // LOAD HISTORY
 
   useEffect(() => {
 
@@ -114,8 +136,6 @@ export default function Home() {
         date: new Date().toLocaleString(),
         userId: user?.id || "guest",
       };
-
-      // SAVE TO FIREBASE
 
       if (user) {
 
@@ -233,8 +253,6 @@ ${analysis.bestResponse}
 
     <main className="min-h-screen bg-black text-white overflow-hidden">
 
-      {/* BACKGROUND */}
-
       <div className="fixed inset-0 bg-gradient-to-br from-purple-900/20 via-black to-black z-0" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-10">
@@ -323,252 +341,14 @@ ${analysis.bestResponse}
 
           </button>
 
-        </div>
-
-        {/* RESULTS */}
-
-        {analysis && (
-
-          <div className="space-y-8 mb-20">
-
-            {/* ACTIONS */}
-
-            <div className="flex flex-wrap justify-center gap-4">
-
-              <div className="bg-purple-600/20 border border-purple-500/20 px-6 py-3 rounded-full font-bold text-lg backdrop-blur-xl">
-                {tone} Mode
-              </div>
-
-              <button
-                onClick={exportPDF}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 transition-all px-6 py-3 rounded-full font-bold text-lg"
-              >
-
-                <Download size={20} />
-                Export PDF
-
-              </button>
-
-              <button
-                onClick={copyAnalysis}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-all px-6 py-3 rounded-full font-bold text-lg"
-              >
-
-                <Copy size={20} />
-                {copied ? "Copied!" : "Copy Analysis"}
-
-              </button>
-
-            </div>
-
-            {/* GRID */}
-
-            <div className="grid md:grid-cols-2 gap-6">
-
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
-
-                <div className="flex items-center gap-3 mb-5">
-
-                  <Brain className="text-purple-400" size={32} />
-
-                  <h3 className="text-3xl font-bold text-purple-400">
-                    Objection Type
-                  </h3>
-
-                </div>
-
-                <p className="text-2xl text-gray-100">
-                  {analysis.objectionType}
-                </p>
-
-              </div>
-
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
-
-                <div className="flex items-center gap-3 mb-5">
-
-                  <HeartHandshake className="text-pink-400" size={32} />
-
-                  <h3 className="text-3xl font-bold text-pink-400">
-                    Emotional State
-                  </h3>
-
-                </div>
-
-                <p className="text-2xl text-gray-100 leading-relaxed">
-                  {analysis.emotionalState}
-                </p>
-
-              </div>
-
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
-
-                <div className="flex items-center gap-3 mb-5">
-
-                  <BadgeDollarSign className="text-green-400" size={32} />
-
-                  <h3 className="text-3xl font-bold text-green-400">
-                    Buying Intent
-                  </h3>
-
-                </div>
-
-                <div className="text-7xl font-black mb-6">
-                  {analysis.buyingIntent}
-                </div>
-
-              </div>
-
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8">
-
-                <div className="flex items-center gap-3 mb-5">
-
-                  <Target className="text-blue-400" size={32} />
-
-                  <h3 className="text-3xl font-bold text-blue-400">
-                    Hidden Meaning
-                  </h3>
-
-                </div>
-
-                <p className="text-xl text-gray-100 leading-relaxed">
-                  {analysis.hiddenMeaning}
-                </p>
-
-              </div>
-
-            </div>
-
-            {/* STRATEGY */}
-
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10">
-
-              <div className="flex items-center gap-3 mb-6">
-
-                <Brain className="text-purple-400" size={34} />
-
-                <h3 className="text-4xl font-bold text-purple-400">
-                  Recommended Strategy
-                </h3>
-
-              </div>
-
-              <p className="text-2xl leading-relaxed text-gray-100">
-                {analysis.recommendedStrategy}
-              </p>
-
-            </div>
-
-            {/* BEST RESPONSE */}
-
-            <div className="bg-gradient-to-r from-purple-700 to-purple-500 rounded-3xl p-10">
-
-              <div className="flex items-center gap-3 mb-6">
-
-                <MessageSquareQuote size={34} />
-
-                <h3 className="text-4xl font-bold">
-                  Best Response
-                </h3>
-
-              </div>
-
-              <p className="text-3xl leading-relaxed font-medium">
-                {analysis.bestResponse}
-              </p>
-
-            </div>
-
-          </div>
-
-        )}
-
-        {/* HISTORY */}
-
-        <div className="mt-24">
-
-          <h2 className="text-5xl font-black bg-gradient-to-r from-purple-400 to-purple-700 bg-clip-text text-transparent mb-10">
-            History
-          </h2>
-
-          <div className="space-y-6">
-
-            {history.map((item, index) => (
-
-              <div
-                key={index}
-                className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-6"
-              >
-
-                <div className="flex justify-between items-start mb-4">
-
-                  <div className="text-purple-400 font-bold text-xl">
-                    {item.tone}
-                  </div>
-
-                  <div className="text-gray-500 text-sm">
-                    {item.date}
-                  </div>
-
-                </div>
-
-                <p className="text-xl text-white mb-4">
-                  {item.objection}
-                </p>
-
-                {item.result && (
-
-                  <div className="grid md:grid-cols-2 gap-4 mt-6">
-
-                    <div className="bg-black/30 rounded-2xl p-4">
-                      <div className="text-purple-400 font-bold mb-2">
-                        Objection Type
-                      </div>
-
-                      <div>
-                        {item.result.objectionType}
-                      </div>
-                    </div>
-
-                    <div className="bg-black/30 rounded-2xl p-4">
-                      <div className="text-pink-400 font-bold mb-2">
-                        Emotional State
-                      </div>
-
-                      <div>
-                        {item.result.emotionalState}
-                      </div>
-                    </div>
-
-                    <div className="bg-black/30 rounded-2xl p-4">
-                      <div className="text-green-400 font-bold mb-2">
-                        Buying Intent
-                      </div>
-
-                      <div>
-                        {item.result.buyingIntent}
-                      </div>
-                    </div>
-
-                    <div className="bg-black/30 rounded-2xl p-4">
-                      <div className="text-blue-400 font-bold mb-2">
-                        Hidden Meaning
-                      </div>
-
-                      <div>
-                        {item.result.hiddenMeaning}
-                      </div>
-                    </div>
-
-                  </div>
-
-                )}
-
-              </div>
-
-            ))}
-
-          </div>
+          {/* STRIPE BUTTON */}
+
+          <button
+            onClick={handleCheckout}
+            className="w-full mt-6 bg-green-500 hover:bg-green-600 transition-all duration-300 rounded-3xl py-6 text-3xl font-bold"
+          >
+            Upgrade To Pro — $29
+          </button>
 
         </div>
 
