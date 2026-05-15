@@ -53,12 +53,51 @@ Return ONLY valid JSON in this exact format:
 
     const data = await response.json();
 
+    console.log("OPENAI RESPONSE:", data);
+
     const content =
       data.choices?.[0]?.message?.content || "{}";
 
-    const parsed = JSON.parse(content);
+    let parsed;
 
-    return Response.json(parsed);
+    try {
+
+      parsed = JSON.parse(content);
+
+    } catch {
+
+      parsed = {
+        objectionType: "Unknown",
+        hiddenMeaning: content,
+        emotionalState: "Unknown",
+        buyingIntent: "Unknown",
+        recommendedStrategy: "Review manually",
+        bestResponse: content,
+      };
+
+    }
+
+    return Response.json({
+      response: `
+Objection Type:
+${parsed.objectionType}
+
+Hidden Meaning:
+${parsed.hiddenMeaning}
+
+Emotional State:
+${parsed.emotionalState}
+
+Buying Intent:
+${parsed.buyingIntent}
+
+Recommended Strategy:
+${parsed.recommendedStrategy}
+
+Best Response:
+${parsed.bestResponse}
+`
+    });
 
   } catch (error) {
 
@@ -66,7 +105,7 @@ Return ONLY valid JSON in this exact format:
 
     return Response.json(
       {
-        error: "Analysis failed",
+        response: "Analysis failed.",
       },
       {
         status: 500,
