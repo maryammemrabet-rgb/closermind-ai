@@ -1,82 +1,50 @@
-import OpenAI from "openai";
+import Stripe from "stripe";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-export async function POST(req) {
-
+export async function POST() {
   try {
 
-    const { objection, tone } = await req.json();
+    const session = await stripe.checkout.sessions.create({
 
-    const completion = await openai.chat.completions.create({
+      payment_method_types: ["card"],
 
-      model: "gpt-4.1-mini",
+      mode: "payment",
 
-      response_format: { type: "json_object" },
-
-      messages: [
-
+      line_items: [
         {
-          role: "system",
-          content: `
-You are an elite sales coach and objection handling expert.
+          price_data: {
+            currency: "usd",
 
-Analyze customer objections deeply using a ${tone} sales style.
+            product_data: {
+              name: "Closermind AI Pro",
+            },
 
-Return ONLY valid JSON.
+            unit_amount: 2900,
+          },
 
-Use this EXACT structure:
-
-{
-  "objectionType": "",
-  "hiddenMeaning": "",
-  "emotionalState": "",
-  "buyingIntent": 0,
-  "recommendedStrategy": "",
-  "bestResponse": ""
-}
-`,
+          quantity: 1,
         },
-
-        {
-          role: "user",
-          content: `
-Customer objection:
-"${objection}"
-`,
-        },
-
       ],
 
-      temperature: 0.8,
+      success_url:
+        "https://closermind-ai-xpay-i7gdizu2w-maryam-s-projects3.vercel.app/success",
 
+      cancel_url:
+        "https://closermind-ai-xpay-i7gdizu2w-maryam-s-projects3.vercel.app/cancel",
     });
 
-    const raw = completion.choices[0].message.content;
-
-    const parsed = JSON.parse(raw);
-
     return Response.json({
-      result: parsed,
+      url: session.url,
     });
 
   } catch (error) {
 
     console.log(error);
 
-    return Response.json({
-      result: {
-        objectionType: "Error",
-        hiddenMeaning: "Something went wrong.",
-        emotionalState: "Unknown",
-        buyingIntent: 0,
-        recommendedStrategy: "Retry analysis.",
-        bestResponse: "Please try again.",
-      },
-    });
-
+    return Response.json(
+      { error: "Stripe checkout failed" },
+      { status: 500 }
+    );
   }
-
 }
