@@ -1,4 +1,5 @@
 export async function POST(req) {
+
   try {
 
     const body = await req.json();
@@ -32,7 +33,6 @@ Return ONLY valid JSON in this exact format:
 
         headers: {
           "Content-Type": "application/json",
-
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
 
@@ -53,51 +53,14 @@ Return ONLY valid JSON in this exact format:
 
     const data = await response.json();
 
-    console.log("OPENAI RESPONSE:", data);
+    console.log(data);
 
     const content =
       data.choices?.[0]?.message?.content || "{}";
 
-    let parsed;
+    const parsed = JSON.parse(content);
 
-    try {
-
-      parsed = JSON.parse(content);
-
-    } catch {
-
-      parsed = {
-        objectionType: "Unknown",
-        hiddenMeaning: content,
-        emotionalState: "Unknown",
-        buyingIntent: "Unknown",
-        recommendedStrategy: "Review manually",
-        bestResponse: content,
-      };
-
-    }
-
-    return Response.json({
-      response: `
-Objection Type:
-${parsed.objectionType}
-
-Hidden Meaning:
-${parsed.hiddenMeaning}
-
-Emotional State:
-${parsed.emotionalState}
-
-Buying Intent:
-${parsed.buyingIntent}
-
-Recommended Strategy:
-${parsed.recommendedStrategy}
-
-Best Response:
-${parsed.bestResponse}
-`
-    });
+    return Response.json(parsed);
 
   } catch (error) {
 
@@ -105,7 +68,12 @@ ${parsed.bestResponse}
 
     return Response.json(
       {
-        response: "Analysis failed.",
+        objectionType: "Error",
+        hiddenMeaning: "API failed",
+        emotionalState: "Unknown",
+        buyingIntent: "0",
+        recommendedStrategy: "Check API",
+        bestResponse: "Something went wrong.",
       },
       {
         status: 500,
